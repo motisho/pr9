@@ -17,7 +17,7 @@ namespace pr9
         List<string> Messages = new List<string>()
         {
             "Здравствуйте!" +
-            "\nРады приветсвовать вас в Телеграм-боте Напоминатор" +
+            "\nРады приветствовать вас в Телеграм-боте Напоминатор" +
             "\nНаш бот создан для того, чтобы напоминать вам о важных событиях и мероприятиях. С ним вы точно не пропустите ничего важного!" +
             "\nНе забудьте добавить бота в список своих контактов и настроить уведомления. Тогда вы всегда будете в курсе событий!",
 
@@ -145,6 +145,32 @@ namespace pr9
                     message.Text.Replace(Time.ToString("HH:mm dd.MM.yyyy") + "\n", "")
                     ));
             }
+        }
+        private async Task HandleUpdateAsync
+            (
+                ITelegramBotClient client,
+                Update update,
+                CancellationToken cancellationToken
+            )
+        {
+            if (update.Type == UpdateType.Message)
+                GetMessages(update.Message);
+            else if (update.Type == UpdateType.CallbackQuery)
+            {
+                CallbackQuery query = update.CallbackQuery;
+                Users User = Users.Find(x => x.IdUser == query.Message.Chat.Id);
+                Events Event = User.Events.Find(x => x.Message == query.Data);
+                User.Events.Remove(Event);
+                SendMessage(query.Message.Chat.Id, 5);
+            }
+        }
+        private async Task HandleErrorAsync(
+            ITelegramBotClient client,
+            Exception exception,
+            HandleErrorSource source,
+            CancellationToken token)
+        {
+            Console.WriteLine("Ошибка" + exception.Message);
         }
     }
 }
