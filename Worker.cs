@@ -1,5 +1,6 @@
 using pr9.Classes;
 using Telegram.Bot;
+using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -10,7 +11,7 @@ namespace pr9
     {
         private readonly ILogger<Worker> _logger;
 
-        readonly string Token = "";
+        readonly string Token = "8036043081:AAH8s9LrPZZm71XGkoN9pPCqcIm1pChoZBE";
         TelegramBotClient TelegramBotClient;
         List<Users> Users = new List<Users>();
         Timer Timer;
@@ -75,7 +76,7 @@ namespace pr9
                 await TelegramBotClient.SendMessage(
                     chatId,
                     $"Указанное вами время и дата не могут быть установлены, " +
-                    $"потму что сейчас уже:{DateTime.Now.ToString("HH.mm dd.MM.yyyy")}");
+                    $"потому что сейчас уже:{DateTime.Now.ToString("HH.mm dd.MM.yyyy")}");
         }
         public async void Command(long chatId, string command)
         {
@@ -171,6 +172,32 @@ namespace pr9
             CancellationToken token)
         {
             Console.WriteLine("Ошибка" + exception.Message);
+        }
+        public async void Tick(object obj)
+        {
+            string TimeNow = DateTime.Now.ToString("HH:mm dd.MM.yyyy");
+            foreach (Users User in Users)
+            {
+                for (int i = 0; i < User.Events.Count; i++)
+                {
+                    if (User.Events[i].Time.ToString("HH:mm dd.MM.yyyy") != TimeNow) continue;
+                    await TelegramBotClient.SendMessage(
+                        User.IdUser,
+                        "Напоминание: " + User.Events[i].Message);
+                    User.Events.Remove(User.Events[i]);
+                }
+            }
+        }
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            TelegramBotClient = new TelegramBotClient(Token);
+            TelegramBotClient.StartReceiving(
+                HandleUpdateAsync,
+                HandleErrorAsync,
+                null,
+                new CancellationTokenSource().Token);
+            TimerCallback TimerCallback = new TimerCallback(Tick);
+            Timer = new Timer(TimerCallback, 0, 0, 60 * 100);
         }
     }
 }
