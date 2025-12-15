@@ -197,7 +197,7 @@ namespace pr9
                 null,
                 new CancellationTokenSource().Token);
             TimerCallback TimerCallback = new TimerCallback(Tick);
-            Timer = new Timer(TimerCallback, 0, 0, 60 * 100);
+            Timer = new Timer(TimerCallback, 0, 0, 60 * 100); 
         }
     }
 }
