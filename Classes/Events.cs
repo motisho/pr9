@@ -14,7 +14,7 @@ namespace pr9.Classes
         public Events(DateTime time, string message) 
         {
             Time = time;
-            Message = message;
+            Message = message; 
         }
     }
 }
